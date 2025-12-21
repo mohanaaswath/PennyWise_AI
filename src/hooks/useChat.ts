@@ -1,17 +1,23 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 import { Message, Conversation } from '@/types/chat';
-import { createNewConversation, createMessage, generateTitle, streamAIResponse, generateId } from '@/lib/chatUtils';
+import { createNewConversation, createMessage, generateTitle, streamAIResponse } from '@/lib/chatUtils';
 import { useToast } from '@/hooks/use-toast';
+
+// Create initial state outside component to avoid re-creation issues
+const createInitialState = () => {
+  const initialConversation = createNewConversation();
+  return {
+    conversations: [initialConversation],
+    activeId: initialConversation.id,
+  };
+};
+
+const initialState = createInitialState();
 
 export const useChat = () => {
   const { toast } = useToast();
-  const [conversations, setConversations] = useState<Conversation[]>(() => {
-    const initial = createNewConversation();
-    return [initial];
-  });
-  const [activeConversationId, setActiveConversationId] = useState<string | null>(() => {
-    return conversations[0]?.id || null;
-  });
+  const [conversations, setConversations] = useState<Conversation[]>(initialState.conversations);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(initialState.activeId);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
   const abortControllerRef = useRef<AbortController | null>(null);
