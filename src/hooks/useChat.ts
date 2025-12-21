@@ -1,8 +1,10 @@
 import { useState, useCallback, useRef } from 'react';
 import { Message, Conversation } from '@/types/chat';
-import { createNewConversation, createMessage, generateTitle, simulateAIResponse, generateId } from '@/lib/chatUtils';
+import { createNewConversation, createMessage, generateTitle, streamAIResponse, generateId } from '@/lib/chatUtils';
+import { useToast } from '@/hooks/use-toast';
 
 export const useChat = () => {
+  const { toast } = useToast();
   const [conversations, setConversations] = useState<Conversation[]>(() => {
     const initial = createNewConversation();
     return [initial];
@@ -47,6 +49,13 @@ export const useChat = () => {
 
     const userMessage = createMessage('user', content);
     
+    // Get current messages for API call
+    const currentMessages = activeConversation?.messages || [];
+    const apiMessages = [...currentMessages, userMessage].map(m => ({
+      role: m.role,
+      content: m.content
+    }));
+
     setConversations(prev => prev.map(conv => {
       if (conv.id === activeConversationId) {
         const updatedMessages = [...conv.messages, userMessage];
@@ -66,8 +75,8 @@ export const useChat = () => {
 
     try {
       let fullResponse = '';
-      await simulateAIResponse(
-        content,
+      await streamAIResponse(
+        apiMessages,
         (chunk) => {
           fullResponse += chunk;
           setStreamingContent(fullResponse);
@@ -103,13 +112,19 @@ export const useChat = () => {
         }));
       } else {
         console.error('Error generating response:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to get response';
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
       }
     } finally {
       setIsStreaming(false);
       setStreamingContent('');
       abortControllerRef.current = null;
     }
-  }, [activeConversationId, isStreaming, streamingContent]);
+  }, [activeConversationId, activeConversation, isStreaming, streamingContent, toast]);
 
   const stopGeneration = useCallback(() => {
     if (abortControllerRef.current) {
@@ -136,6 +151,12 @@ export const useChat = () => {
 
     const lastUserMessage = messages[lastUserMessageIndex];
     
+    // Get messages up to and including the last user message for API
+    const apiMessages = messages.slice(0, lastUserMessageIndex + 1).map(m => ({
+      role: m.role,
+      content: m.content
+    }));
+
     // Remove messages after the last user message
     setConversations(prev => prev.map(conv => {
       if (conv.id === activeConversationId) {
@@ -154,8 +175,8 @@ export const useChat = () => {
 
     try {
       let fullResponse = '';
-      await simulateAIResponse(
-        lastUserMessage.content,
+      await streamAIResponse(
+        apiMessages,
         (chunk) => {
           fullResponse += chunk;
           setStreamingContent(fullResponse);
@@ -188,13 +209,21 @@ export const useChat = () => {
           }
           return conv;
         }));
+      } else {
+        console.error('Error regenerating response:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to regenerate';
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
       }
     } finally {
       setIsStreaming(false);
       setStreamingContent('');
       abortControllerRef.current = null;
     }
-  }, [activeConversation, activeConversationId, isStreaming, streamingContent]);
+  }, [activeConversation, activeConversationId, isStreaming, streamingContent, toast]);
 
   return {
     conversations,

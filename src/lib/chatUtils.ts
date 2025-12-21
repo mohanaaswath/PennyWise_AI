@@ -41,37 +41,96 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
   }
 };
 
-// Simulated AI response for demo purposes
-const aiResponses = [
-  "I understand your question. Let me provide a helpful response.",
-  "That's an interesting point. Here's what I think about it.",
-  "Great question! Let me break this down for you.",
-  "I'd be happy to help you with that. Here's my analysis.",
-  "Thank you for asking. Let me share some insights on this topic.",
-];
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
-export const simulateAIResponse = async (
-  message: string,
+export const streamAIResponse = async (
+  messages: { role: string; content: string }[],
   onChunk: (chunk: string) => void,
   signal?: AbortSignal
 ): Promise<string> => {
-  const baseResponse = aiResponses[Math.floor(Math.random() * aiResponses.length)];
-  const fullResponse = `${baseResponse}\n\nBased on your message: "${message.slice(0, 50)}${message.length > 50 ? '...' : ''}", I can provide you with detailed information and assistance. This is a demonstration of the streaming capability, where text appears gradually to simulate real-time generation.\n\nFeel free to ask follow-up questions or request more specific information!`;
-  
-  const words = fullResponse.split(' ');
-  let result = '';
-  
-  for (let i = 0; i < words.length; i++) {
-    if (signal?.aborted) {
-      throw new DOMException('Aborted', 'AbortError');
+  const response = await fetch(CHAT_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+    },
+    body: JSON.stringify({ messages }),
+    signal,
+  });
+
+  if (!response.ok) {
+    if (response.status === 429) {
+      throw new Error('Rate limit exceeded. Please try again later.');
     }
-    
-    await new Promise(resolve => setTimeout(resolve, 50 + Math.random() * 50));
-    
-    const word = words[i] + (i < words.length - 1 ? ' ' : '');
-    result += word;
-    onChunk(word);
+    if (response.status === 402) {
+      throw new Error('Payment required. Please add funds.');
+    }
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || `Request failed: ${response.status}`);
   }
-  
+
+  if (!response.body) {
+    throw new Error('No response body');
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let result = '';
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+
+    // Process line by line
+    let newlineIndex: number;
+    while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
+      let line = buffer.slice(0, newlineIndex);
+      buffer = buffer.slice(newlineIndex + 1);
+
+      if (line.endsWith('\r')) line = line.slice(0, -1);
+      if (line.startsWith(':') || line.trim() === '') continue;
+      if (!line.startsWith('data: ')) continue;
+
+      const jsonStr = line.slice(6).trim();
+      if (jsonStr === '[DONE]') break;
+
+      try {
+        const parsed = JSON.parse(jsonStr);
+        const content = parsed.choices?.[0]?.delta?.content;
+        if (content) {
+          result += content;
+          onChunk(content);
+        }
+      } catch {
+        // Incomplete JSON, put it back
+        buffer = line + '\n' + buffer;
+        break;
+      }
+    }
+  }
+
+  // Final flush
+  if (buffer.trim()) {
+    for (let raw of buffer.split('\n')) {
+      if (!raw) continue;
+      if (raw.endsWith('\r')) raw = raw.slice(0, -1);
+      if (raw.startsWith(':') || raw.trim() === '') continue;
+      if (!raw.startsWith('data: ')) continue;
+      const jsonStr = raw.slice(6).trim();
+      if (jsonStr === '[DONE]') continue;
+      try {
+        const parsed = JSON.parse(jsonStr);
+        const content = parsed.choices?.[0]?.delta?.content;
+        if (content) {
+          result += content;
+          onChunk(content);
+        }
+      } catch { /* ignore */ }
+    }
+  }
+
   return result;
 };
