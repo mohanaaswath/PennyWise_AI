@@ -1,4 +1,5 @@
 import { Bot, Sparkles, Zap, MessageSquare } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const EmptyChat = () => {
   return (
@@ -15,26 +16,34 @@ export const EmptyChat = () => {
       </p>
 
       <div className="grid max-w-2xl gap-4 sm:grid-cols-2">
-        <SuggestionCard
-          icon={<Sparkles className="h-5 w-5" />}
-          title="Creative Writing"
-          description="Help me write a story or poem"
-        />
-        <SuggestionCard
-          icon={<Zap className="h-5 w-5" />}
-          title="Problem Solving"
-          description="Explain a complex concept simply"
-        />
-        <SuggestionCard
-          icon={<MessageSquare className="h-5 w-5" />}
-          title="Conversation"
-          description="Let's have a friendly chat"
-        />
-        <SuggestionCard
-          icon={<Bot className="h-5 w-5" />}
-          title="Code Help"
-          description="Debug or explain some code"
-        />
+        <Link to="/creative-writing">
+          <SuggestionCard
+            icon={<Sparkles className="h-5 w-5" />}
+            title="Creative Writing"
+            description="Help me write a story or poem"
+          />
+        </Link>
+        <Link to="/problem-solving">
+          <SuggestionCard
+            icon={<Zap className="h-5 w-5" />}
+            title="Problem Solving"
+            description="Explain a complex concept simply"
+          />
+        </Link>
+        <Link to="/conversation">
+          <SuggestionCard
+            icon={<MessageSquare className="h-5 w-5" />}
+            title="Conversation"
+            description="Let's have a friendly chat"
+          />
+        </Link>
+        <Link to="/code-help">
+          <SuggestionCard
+            icon={<Bot className="h-5 w-5" />}
+            title="Code Help"
+            description="Debug or explain some code"
+          />
+        </Link>
       </div>
     </div>
   );
