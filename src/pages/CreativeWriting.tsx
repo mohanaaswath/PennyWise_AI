@@ -1,8 +1,35 @@
+import { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useChat } from '@/hooks/useChat';
+import { ChatMessage } from '@/components/chat/ChatMessage';
+import { ChatInput } from '@/components/chat/ChatInput';
+import { StreamingMessage } from '@/components/chat/StreamingMessage';
 
 const CreativeWriting = () => {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const {
+    activeConversation,
+    isStreaming,
+    streamingContent,
+    sendMessage,
+    stopGeneration,
+    regenerateResponse,
+  } = useChat();
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [activeConversation?.messages, streamingContent]);
+
+  const hasMessages = activeConversation && activeConversation.messages.length > 0;
+  const canRegenerate = hasMessages && activeConversation.messages.some(m => m.role === 'assistant');
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <header className="border-b border-border p-4">
@@ -14,34 +41,61 @@ const CreativeWriting = () => {
         </Link>
       </header>
       
-      <main className="flex flex-1 flex-col items-center justify-center p-8">
-        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20">
-          <Sparkles className="h-8 w-8 text-primary" />
+      <main className="flex flex-1 flex-col">
+        {/* Header Section */}
+        <div className="flex flex-col items-center p-8">
+          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20">
+            <Sparkles className="h-8 w-8 text-primary" />
+          </div>
+          
+          <h1 className="mb-4 text-3xl font-bold text-foreground">Creative Writing</h1>
+          <p className="mb-8 max-w-md text-center text-muted-foreground">
+            Let me help you craft stories, poems, scripts, and more. Share your ideas and I'll bring them to life with words.
+          </p>
+          
+          {!hasMessages && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-xl border border-border bg-card p-4">
+                <h3 className="font-medium text-foreground">Story Ideas</h3>
+                <p className="text-sm text-muted-foreground">Generate unique plot ideas</p>
+              </div>
+              <div className="rounded-xl border border-border bg-card p-4">
+                <h3 className="font-medium text-foreground">Poetry</h3>
+                <p className="text-sm text-muted-foreground">Create poems in any style</p>
+              </div>
+              <div className="rounded-xl border border-border bg-card p-4">
+                <h3 className="font-medium text-foreground">Character Development</h3>
+                <p className="text-sm text-muted-foreground">Build compelling characters</p>
+              </div>
+              <div className="rounded-xl border border-border bg-card p-4">
+                <h3 className="font-medium text-foreground">Dialogue Writing</h3>
+                <p className="text-sm text-muted-foreground">Craft natural conversations</p>
+              </div>
+            </div>
+          )}
         </div>
-        
-        <h1 className="mb-4 text-3xl font-bold text-foreground">Creative Writing</h1>
-        <p className="mb-8 max-w-md text-center text-muted-foreground">
-          Let me help you craft stories, poems, scripts, and more. Share your ideas and I'll bring them to life with words.
-        </p>
-        
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-xl border border-border bg-card p-4">
-            <h3 className="font-medium text-foreground">Story Ideas</h3>
-            <p className="text-sm text-muted-foreground">Generate unique plot ideas</p>
+
+        {/* Messages Area */}
+        {hasMessages && (
+          <div className="flex-1 overflow-y-auto px-4 pb-32">
+            {activeConversation.messages.map((message) => (
+              <ChatMessage key={message.id} message={message} />
+            ))}
+            {isStreaming && streamingContent && (
+              <StreamingMessage content={streamingContent} />
+            )}
+            <div ref={messagesEndRef} />
           </div>
-          <div className="rounded-xl border border-border bg-card p-4">
-            <h3 className="font-medium text-foreground">Poetry</h3>
-            <p className="text-sm text-muted-foreground">Create poems in any style</p>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-4">
-            <h3 className="font-medium text-foreground">Character Development</h3>
-            <p className="text-sm text-muted-foreground">Build compelling characters</p>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-4">
-            <h3 className="font-medium text-foreground">Dialogue Writing</h3>
-            <p className="text-sm text-muted-foreground">Craft natural conversations</p>
-          </div>
-        </div>
+        )}
+
+        {/* Input Area */}
+        <ChatInput
+          onSendMessage={sendMessage}
+          onStopGeneration={stopGeneration}
+          onRegenerateResponse={regenerateResponse}
+          isStreaming={isStreaming}
+          canRegenerate={canRegenerate}
+        />
       </main>
     </div>
   );
