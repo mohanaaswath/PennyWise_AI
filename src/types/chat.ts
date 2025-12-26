@@ -9,6 +9,7 @@ export interface Conversation {
   id: string;
   title: string;
   messages: Message[];
+  isPinned: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

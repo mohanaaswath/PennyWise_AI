@@ -9,6 +9,7 @@ export const createNewConversation = (): Conversation => {
     id: generateId(),
     title: 'New Chat',
     messages: [],
+    isPinned: false,
     createdAt: new Date(),
     updatedAt: new Date(),
   };

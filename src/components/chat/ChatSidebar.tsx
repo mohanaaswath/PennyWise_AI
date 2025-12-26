@@ -1,4 +1,4 @@
-import { Plus, MessageSquare, Trash2, PanelLeftClose, PanelLeft, Settings, LogOut, User } from 'lucide-react';
+import { Plus, MessageSquare, Trash2, PanelLeftClose, PanelLeft, Settings, LogOut, User, Pin, PinOff } from 'lucide-react';
 import { Conversation } from '@/types/chat';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -22,6 +22,7 @@ interface ChatSidebarProps {
   onSelectConversation: (id: string) => void;
   onNewConversation: () => void;
   onDeleteConversation: (id: string) => void;
+  onTogglePin?: (id: string) => void;
 }
 
 // Group conversations by time period
@@ -33,6 +34,7 @@ const groupConversations = (conversations: Conversation[]) => {
   const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
 
   const groups: { [key: string]: Conversation[] } = {
+    'Pinned': [],
     'Today': [],
     'Yesterday': [],
     '7 Days': [],
@@ -41,6 +43,11 @@ const groupConversations = (conversations: Conversation[]) => {
   };
 
   conversations.forEach(conv => {
+    if (conv.isPinned) {
+      groups['Pinned'].push(conv);
+      return;
+    }
+    
     const date = new Date(conv.updatedAt);
     if (date >= today) {
       groups['Today'].push(conv);
@@ -66,6 +73,7 @@ export const ChatSidebar = ({
   onSelectConversation,
   onNewConversation,
   onDeleteConversation,
+  onTogglePin,
 }: ChatSidebarProps) => {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
@@ -149,47 +157,74 @@ export const ChatSidebar = ({
 
           {/* Conversations List */}
           <div className="flex-1 overflow-y-auto scrollbar-thin p-2">
-            {Object.entries(groupedConversations).map(([period, convs]) => {
-              if (convs.length === 0) return null;
-              
-              return (
-                <div key={period} className="mb-4">
-                  <p className="mb-2 px-3 text-xs font-medium text-muted-foreground">
-                    {period}
-                  </p>
-                  <div className="space-y-1">
-                    {convs.map((conversation) => (
-                      <div
-                        key={conversation.id}
-                        className={cn(
-                          'group relative flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors',
-                          activeConversationId === conversation.id
-                            ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                            : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
-                        )}
-                        onClick={() => onSelectConversation(conversation.id)}
-                      >
-                        <MessageSquare className="h-4 w-4 flex-shrink-0" />
-                        <p className="min-w-0 flex-1 truncate text-sm">
-                          {conversation.title}
-                        </p>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteConversation(conversation.id);
-                          }}
+            {conversations.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <MessageSquare className="mb-2 h-8 w-8 text-muted-foreground/50" />
+                <p className="text-sm text-muted-foreground">No conversations yet</p>
+                <p className="text-xs text-muted-foreground/70">Click "New Chat" to start</p>
+              </div>
+            ) : (
+              Object.entries(groupedConversations).map(([period, convs]) => {
+                if (convs.length === 0) return null;
+                
+                return (
+                  <div key={period} className="mb-4">
+                    <p className="mb-2 px-3 text-xs font-medium text-muted-foreground">
+                      {period}
+                    </p>
+                    <div className="space-y-1">
+                      {convs.map((conversation) => (
+                        <div
+                          key={conversation.id}
+                          className={cn(
+                            'group relative flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors',
+                            activeConversationId === conversation.id
+                              ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                              : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
+                          )}
+                          onClick={() => onSelectConversation(conversation.id)}
                         >
-                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                        </Button>
-                      </div>
-                    ))}
+                          <MessageSquare className="h-4 w-4 flex-shrink-0" />
+                          <p className="min-w-0 flex-1 truncate text-sm">
+                            {conversation.title}
+                          </p>
+                          <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                            {onTogglePin && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onTogglePin(conversation.id);
+                                }}
+                              >
+                                {conversation.isPinned ? (
+                                  <PinOff className="h-3.5 w-3.5 text-muted-foreground" />
+                                ) : (
+                                  <Pin className="h-3.5 w-3.5 text-muted-foreground" />
+                                )}
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDeleteConversation(conversation.id);
+                              }}
+                            >
+                              <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
 
           {/* User Profile Footer */}
