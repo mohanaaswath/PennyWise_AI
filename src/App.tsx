@@ -9,6 +9,7 @@ import CreativeWriting from "./pages/CreativeWriting";
 import ProblemSolving from "./pages/ProblemSolving";
 import Conversation from "./pages/Conversation";
 import CodeHelp from "./pages/CodeHelp";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/creative-writing" element={<CreativeWriting />} />
           <Route path="/problem-solving" element={<ProblemSolving />} />
           <Route path="/conversation" element={<Conversation />} />
