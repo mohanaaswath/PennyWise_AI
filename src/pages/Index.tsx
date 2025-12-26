@@ -17,9 +17,11 @@ const Index = () => {
     activeConversationId,
     isStreaming,
     streamingContent,
+    isLoading,
     createConversation,
     selectConversation,
     deleteConversation,
+    togglePin,
     sendMessage,
     stopGeneration,
     regenerateResponse,
@@ -36,6 +38,14 @@ const Index = () => {
   const hasMessages = activeConversation && activeConversation.messages.length > 0;
   const canRegenerate = hasMessages && activeConversation.messages.some(m => m.role === 'assistant');
 
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Sidebar */}
@@ -47,6 +57,7 @@ const Index = () => {
         onSelectConversation={selectConversation}
         onNewConversation={createConversation}
         onDeleteConversation={deleteConversation}
+        onTogglePin={togglePin}
       />
 
       {/* Main Content */}
