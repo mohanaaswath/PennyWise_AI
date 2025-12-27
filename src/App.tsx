@@ -10,6 +10,7 @@ import ProblemSolving from "./pages/ProblemSolving";
 import Conversation from "./pages/Conversation";
 import CodeHelp from "./pages/CodeHelp";
 import Auth from "./pages/Auth";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/creative-writing" element={<CreativeWriting />} />
           <Route path="/problem-solving" element={<ProblemSolving />} />
           <Route path="/conversation" element={<Conversation />} />
