@@ -137,22 +137,27 @@ export const ChatSidebar = ({
       >
         <div className="flex h-full flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-sidebar-border p-4">
-            <Button
-              onClick={onNewConversation}
-              className="flex-1 justify-start gap-2 bg-primary/10 text-primary hover:bg-primary/20"
-            >
-              <Plus className="h-4 w-4" />
-              New Chat
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onToggle}
-              className="ml-2 h-10 w-10 text-muted-foreground hover:text-foreground"
-            >
-              <PanelLeftClose className="h-5 w-5" />
-            </Button>
+          <div className="border-b border-sidebar-border p-4">
+            <h2 className="mb-4 text-sm font-medium tracking-widest text-primary">
+              PENNYWISE AI
+            </h2>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={onNewConversation}
+                className="flex-1 justify-start gap-2 bg-primary/10 text-primary hover:bg-primary/20"
+              >
+                <Plus className="h-4 w-4" />
+                New Chat
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onToggle}
+                className="h-10 w-10 text-muted-foreground hover:text-foreground"
+              >
+                <PanelLeftClose className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
 
           {/* Conversations List */}

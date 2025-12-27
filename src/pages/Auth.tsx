@@ -91,7 +91,11 @@ const Auth = () => {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+      <h2 className="mb-8 text-sm font-medium tracking-widest text-primary">
+        PENNYWISE AI
+      </h2>
+      
       <Card className="w-full max-w-md border-border bg-card">
         <CardHeader className="space-y-4 text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">

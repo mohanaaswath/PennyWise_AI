@@ -4,6 +4,10 @@ import { Link } from 'react-router-dom';
 export const EmptyChat = () => {
   return (
     <div className="flex flex-1 flex-col items-center justify-center p-8">
+      <h2 className="mb-6 text-sm font-medium tracking-widest text-primary">
+        PENNYWISE AI
+      </h2>
+      
       <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 shadow-glow">
         <Bot className="h-10 w-10 text-primary" />
       </div>
