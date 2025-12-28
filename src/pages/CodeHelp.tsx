@@ -1,11 +1,12 @@
-import { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Bot } from 'lucide-react';
+import { useRef, useEffect } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useChat } from '@/hooks/useChat';
 import { ChatMessage } from '@/components/chat/ChatMessage';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { StreamingMessage } from '@/components/chat/StreamingMessage';
+import { PennywiseLogo } from '@/components/PennywiseLogo';
 
 const CodeHelp = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -45,7 +46,7 @@ const CodeHelp = () => {
         {/* Header Section */}
         <div className="flex flex-col items-center p-8">
           <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20">
-            <Bot className="h-8 w-8 text-primary" />
+            <PennywiseLogo size="lg" />
           </div>
           
           <h1 className="mb-4 text-3xl font-bold text-foreground">Code Help</h1>

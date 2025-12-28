@@ -1,5 +1,6 @@
-import { Bot, Sparkles, Zap, MessageSquare } from 'lucide-react';
+import { Sparkles, Zap, MessageSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { PennywiseLogo } from '@/components/PennywiseLogo';
 
 export const EmptyChat = () => {
   return (
@@ -9,7 +10,7 @@ export const EmptyChat = () => {
       </h2>
       
       <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 shadow-glow">
-        <Bot className="h-10 w-10 text-primary" />
+        <PennywiseLogo size="lg" />
       </div>
       
       <h1 className="mb-2 text-2xl font-semibold text-foreground">
@@ -43,7 +44,7 @@ export const EmptyChat = () => {
         </Link>
         <Link to="/code-help">
           <SuggestionCard
-            icon={<Bot className="h-5 w-5" />}
+            icon={<PennywiseLogo size="sm" />}
             title="Code Help"
             description="Debug or explain some code"
           />
