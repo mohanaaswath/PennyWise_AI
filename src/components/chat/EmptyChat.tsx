@@ -5,15 +5,15 @@ import { PennywiseLogo } from '@/components/PennywiseLogo';
 export const EmptyChat = () => {
   return (
     <div className="flex flex-1 flex-col items-center justify-center p-8">
-      <h2 className="mb-6 text-sm font-medium tracking-widest text-primary">
+      <h2 className="mb-6 text-sm font-medium tracking-widest gradient-text">
         PENNYWISE AI
       </h2>
       
-      <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 shadow-glow">
+      <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 via-accent/10 to-accent/20 shadow-glow">
         <PennywiseLogo size="lg" />
       </div>
       
-      <h1 className="mb-2 text-2xl font-semibold text-foreground">
+      <h1 className="mb-2 font-display text-2xl font-semibold text-foreground">
         How can I help you today?
       </h1>
       <p className="mb-8 text-center text-muted-foreground">
@@ -63,9 +63,9 @@ interface SuggestionCardProps {
 const SuggestionCard = ({ icon, title, description }: SuggestionCardProps) => {
   return (
     <div className="group cursor-pointer rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/50 hover:shadow-glow">
-      <div className="mb-2 flex items-center gap-2 text-primary">
+      <div className="mb-2 flex items-center gap-2 gradient-text">
         {icon}
-        <span className="font-medium">{title}</span>
+        <span className="font-display font-medium">{title}</span>
       </div>
       <p className="text-sm text-muted-foreground">{description}</p>
     </div>
