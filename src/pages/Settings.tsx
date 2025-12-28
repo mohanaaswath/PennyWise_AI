@@ -242,7 +242,7 @@ export default function Settings() {
 
         {/* Sidebar */}
         <div className="w-56 flex-shrink-0 border-r border-border bg-secondary/30 p-4">
-          <h2 className="mb-4 text-sm font-medium tracking-widest text-primary">
+          <h2 className="mb-4 text-sm font-medium tracking-widest gradient-text">
             PENNYWISE AI
           </h2>
           <nav className="space-y-1">

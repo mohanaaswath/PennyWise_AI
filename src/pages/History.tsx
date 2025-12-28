@@ -141,11 +141,11 @@ export default function History() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-3">
-            <h2 className="text-sm font-medium tracking-widest text-primary">
+            <h2 className="text-sm font-medium tracking-widest gradient-text">
               PENNYWISE AI
             </h2>
             <span className="text-muted-foreground">/</span>
-            <h1 className="text-xl font-semibold text-foreground">Chat History</h1>
+            <h1 className="font-display text-xl font-semibold text-foreground">Chat History</h1>
           </div>
         </div>
       </header>

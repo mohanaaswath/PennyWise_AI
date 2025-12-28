@@ -138,7 +138,7 @@ export const ChatSidebar = ({
         <div className="flex h-full flex-col">
           {/* Header */}
           <div className="border-b border-sidebar-border p-4">
-            <h2 className="mb-4 text-sm font-medium tracking-widest text-primary">
+            <h2 className="mb-4 text-sm font-medium tracking-widest gradient-text">
               PENNYWISE AI
             </h2>
             <div className="flex items-center gap-2">

@@ -2,63 +2,69 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
 
 @layer base {
   :root {
-    --background: 220 14% 10%;
-    --foreground: 210 20% 95%;
+    --background: 240 15% 6%;
+    --foreground: 200 20% 95%;
 
-    --card: 220 14% 12%;
-    --card-foreground: 210 20% 95%;
+    --card: 240 15% 9%;
+    --card-foreground: 200 20% 95%;
 
-    --popover: 220 14% 14%;
-    --popover-foreground: 210 20% 95%;
+    --popover: 240 15% 11%;
+    --popover-foreground: 200 20% 95%;
 
-    --primary: 142 70% 45%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 185 85% 50%;
+    --primary-foreground: 240 15% 6%;
 
-    --secondary: 220 14% 18%;
-    --secondary-foreground: 210 20% 90%;
+    --secondary: 275 70% 55%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 220 14% 20%;
-    --muted-foreground: 215 15% 55%;
+    --muted: 240 15% 18%;
+    --muted-foreground: 220 15% 55%;
 
-    --accent: 142 60% 40%;
+    --accent: 275 70% 55%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 14% 20%;
-    --input: 220 14% 18%;
-    --ring: 142 70% 45%;
+    --border: 240 15% 16%;
+    --input: 240 15% 14%;
+    --ring: 185 85% 50%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 220 14% 8%;
-    --sidebar-foreground: 210 20% 85%;
-    --sidebar-primary: 142 70% 45%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 14% 15%;
-    --sidebar-accent-foreground: 210 20% 95%;
-    --sidebar-border: 220 14% 16%;
-    --sidebar-ring: 142 70% 45%;
+    --sidebar-background: 240 15% 5%;
+    --sidebar-foreground: 200 20% 85%;
+    --sidebar-primary: 185 85% 50%;
+    --sidebar-primary-foreground: 240 15% 6%;
+    --sidebar-accent: 275 70% 55%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 240 15% 12%;
+    --sidebar-ring: 185 85% 50%;
 
-    --chat-user: 220 14% 16%;
-    --chat-assistant: 220 14% 12%;
-    --chat-hover: 220 14% 22%;
+    --chat-user: 240 15% 14%;
+    --chat-assistant: 240 15% 9%;
+    --chat-hover: 240 15% 20%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(142, 70%, 45%), hsl(160, 60%, 40%));
-    --gradient-subtle: linear-gradient(180deg, hsl(220, 14%, 12%), hsl(220, 14%, 10%));
+    /* Brand gradient colors */
+    --gradient-start: 185 85% 50%;
+    --gradient-end: 275 70% 55%;
     
-    --shadow-glow: 0 0 20px hsl(142 70% 45% / 0.2);
-    --shadow-card: 0 4px 20px hsl(0 0% 0% / 0.3);
+    --gradient-primary: linear-gradient(135deg, hsl(185, 85%, 50%), hsl(275, 70%, 55%));
+    --gradient-subtle: linear-gradient(180deg, hsl(240, 15%, 9%), hsl(240, 15%, 6%));
+    --gradient-text: linear-gradient(135deg, hsl(185, 85%, 55%), hsl(275, 70%, 60%));
+    
+    --shadow-glow: 0 0 30px hsl(185 85% 50% / 0.25);
+    --shadow-glow-purple: 0 0 30px hsl(275 70% 55% / 0.25);
+    --shadow-card: 0 4px 20px hsl(0 0% 0% / 0.4);
   }
 
   .dark {
-    --background: 220 14% 10%;
-    --foreground: 210 20% 95%;
+    --background: 240 15% 6%;
+    --foreground: 200 20% 95%;
   }
 }
 
@@ -69,7 +75,36 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+
+  .gradient-text {
+    background: var(--gradient-text);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .gradient-border {
+    position: relative;
+    background: hsl(var(--card));
+    border: 1px solid transparent;
+    background-clip: padding-box;
+  }
+
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    margin: -1px;
+    border-radius: inherit;
+    background: var(--gradient-primary);
+    opacity: 0.5;
   }
 }
 
