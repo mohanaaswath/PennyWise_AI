@@ -15,13 +15,106 @@ export const createNewConversation = (): Conversation => {
   };
 };
 
-export const createMessage = (role: 'user' | 'assistant', content: string): Message => {
+export const createMessage = (role: 'user' | 'assistant', content: string, imageUrl?: string): Message => {
   return {
     id: generateId(),
     role,
     content,
     timestamp: new Date(),
+    imageUrl,
   };
+};
+
+// Detect if user is requesting an image generation
+export const isImageRequest = (content: string): boolean => {
+  const lowerContent = content.toLowerCase();
+  const imageKeywords = [
+    'generate image',
+    'create image',
+    'make image',
+    'draw',
+    'generate a picture',
+    'create a picture',
+    'make a picture',
+    'generate an image',
+    'create an image',
+    'make an image',
+    'generate picture',
+    'create picture',
+    'illustrate',
+    'paint',
+    'sketch',
+    'design an image',
+    'show me an image',
+    'show me a picture',
+    'visualize',
+    'render an image',
+    'generate art',
+    'create art',
+    'make art',
+  ];
+  
+  return imageKeywords.some(keyword => lowerContent.includes(keyword));
+};
+
+// Extract the image prompt from user message
+export const extractImagePrompt = (content: string): string => {
+  // Remove common prefixes
+  const prefixes = [
+    'generate image of',
+    'create image of',
+    'make image of',
+    'generate an image of',
+    'create an image of',
+    'make an image of',
+    'generate a picture of',
+    'create a picture of',
+    'make a picture of',
+    'draw',
+    'illustrate',
+    'paint',
+    'sketch',
+    'visualize',
+    'render an image of',
+    'show me an image of',
+    'show me a picture of',
+    'generate art of',
+    'create art of',
+  ];
+  
+  let prompt = content;
+  for (const prefix of prefixes) {
+    const regex = new RegExp(`^${prefix}\\s*`, 'i');
+    prompt = prompt.replace(regex, '');
+  }
+  
+  return prompt.trim() || content;
+};
+
+const IMAGE_GEN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-image`;
+
+export const generateImage = async (prompt: string): Promise<{ imageUrl: string; description: string }> => {
+  const response = await fetch(IMAGE_GEN_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+    },
+    body: JSON.stringify({ prompt }),
+  });
+
+  if (!response.ok) {
+    if (response.status === 429) {
+      throw new Error('Rate limit exceeded. Please try again later.');
+    }
+    if (response.status === 402) {
+      throw new Error('Usage limit reached. Please add credits.');
+    }
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to generate image');
+  }
+
+  return response.json();
 };
 
 export const generateTitle = (messages: Message[]): string => {

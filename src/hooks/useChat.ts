@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Message, Conversation } from '@/types/chat';
-import { createMessage, generateTitle, streamAIResponse } from '@/lib/chatUtils';
+import { createMessage, generateTitle, streamAIResponse, isImageRequest, extractImagePrompt, generateImage } from '@/lib/chatUtils';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -54,12 +54,25 @@ export const useChat = () => {
             updatedAt: new Date(conv.updated_at),
             messages: (msgData || [])
               .filter(m => m.conversation_id === conv.id)
-              .map(m => ({
-                id: m.id,
-                role: m.role as 'user' | 'assistant',
-                content: m.content,
-                timestamp: new Date(m.created_at)
-              }))
+              .map(m => {
+                // Parse image URL from stored content
+                let content = m.content;
+                let imageUrl: string | undefined;
+                
+                const imageMatch = m.content.match(/^\[IMAGE:(data:image\/[^;]+;base64,[^\]]+)\]/);
+                if (imageMatch) {
+                  imageUrl = imageMatch[1];
+                  content = m.content.replace(imageMatch[0], '');
+                }
+                
+                return {
+                  id: m.id,
+                  role: m.role as 'user' | 'assistant',
+                  content,
+                  timestamp: new Date(m.created_at),
+                  imageUrl,
+                };
+              })
           }));
 
           setConversations(conversationsWithMessages);
@@ -220,6 +233,62 @@ export const useChat = () => {
     } catch (error) {
       console.error('Error saving user message:', error);
     }
+
+    // Check if this is an image generation request
+    if (isImageRequest(content)) {
+      setIsStreaming(true);
+      setStreamingContent('🎨 Generating image...');
+
+      try {
+        const imagePrompt = extractImagePrompt(content);
+        const { imageUrl, description } = await generateImage(imagePrompt);
+        
+        const assistantMessage = createMessage(
+          'assistant', 
+          description || `Here's the image I generated for "${imagePrompt}"`,
+          imageUrl
+        );
+        
+        setConversations(prev => prev.map(conv => {
+          if (conv.id === activeConversationId) {
+            return {
+              ...conv,
+              messages: [...conv.messages, assistantMessage],
+              updatedAt: new Date(),
+            };
+          }
+          return conv;
+        }));
+
+        // Save assistant message with image URL in content
+        await supabase.from('messages').insert({
+          id: assistantMessage.id,
+          conversation_id: activeConversationId,
+          role: 'assistant',
+          content: `[IMAGE:${imageUrl}]${assistantMessage.content}`
+        });
+
+        await supabase
+          .from('conversations')
+          .update({ updated_at: new Date().toISOString() })
+          .eq('id', activeConversationId);
+
+      } catch (error) {
+        console.error('Error generating image:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to generate image';
+        toast({
+          title: "Image Generation Failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      } finally {
+        setIsStreaming(false);
+        setStreamingContent('');
+      }
+      return;
+    }
+
+    // Regular text response
 
     setIsStreaming(true);
     setStreamingContent('');
