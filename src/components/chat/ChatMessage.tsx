@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Copy, Check, User } from 'lucide-react';
+import { Copy, Check, User, Download } from 'lucide-react';
 import { Message } from '@/types/chat';
 import { Button } from '@/components/ui/button';
 import { copyToClipboard } from '@/lib/chatUtils';
@@ -13,12 +13,24 @@ interface ChatMessageProps {
 
 export const ChatMessage = ({ message, isStreaming = false }: ChatMessageProps) => {
   const [copied, setCopied] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const handleCopy = async () => {
     const success = await copyToClipboard(message.content);
     if (success) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleDownloadImage = () => {
+    if (message.imageUrl) {
+      const link = document.createElement('a');
+      link.href = message.imageUrl;
+      link.download = `pennywise-ai-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
 
@@ -48,7 +60,7 @@ export const ChatMessage = ({ message, isStreaming = false }: ChatMessageProps) 
         <div className="min-w-0 flex-1">
           <div className="mb-1 flex items-center gap-2">
             <span className="text-sm font-medium">
-              {isUser ? 'You' : 'Assistant'}
+              {isUser ? 'You' : 'Pennywise AI'}
             </span>
             <span className="text-xs text-muted-foreground">
               {message.timestamp.toLocaleTimeString([], {
@@ -57,6 +69,39 @@ export const ChatMessage = ({ message, isStreaming = false }: ChatMessageProps) 
               })}
             </span>
           </div>
+          
+          {/* Image Display */}
+          {message.imageUrl && (
+            <div className="mb-4 relative group/image">
+              <div className={cn(
+                "relative overflow-hidden rounded-xl border border-border bg-card shadow-card transition-all",
+                !imageLoaded && "animate-pulse min-h-[200px]"
+              )}>
+                <img 
+                  src={message.imageUrl} 
+                  alt="Generated image" 
+                  className={cn(
+                    "max-w-full max-h-[512px] rounded-xl object-contain transition-opacity duration-300",
+                    imageLoaded ? "opacity-100" : "opacity-0"
+                  )}
+                  onLoad={() => setImageLoaded(true)}
+                />
+                {imageLoaded && (
+                  <div className="absolute bottom-2 right-2 opacity-0 group-hover/image:opacity-100 transition-opacity">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleDownloadImage}
+                      className="gap-2 bg-background/80 backdrop-blur-sm hover:bg-background"
+                    >
+                      <Download className="h-4 w-4" />
+                      Download
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           
           <div className="prose prose-invert max-w-none">
             <p className="whitespace-pre-wrap text-foreground leading-relaxed">
