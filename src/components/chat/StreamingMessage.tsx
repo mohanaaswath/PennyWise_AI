@@ -1,4 +1,4 @@
-import { Bot } from 'lucide-react';
+import { PennywiseLogo } from '@/components/PennywiseLogo';
 
 interface StreamingMessageProps {
   content: string;
@@ -10,7 +10,7 @@ export const StreamingMessage = ({ content }: StreamingMessageProps) => {
       <div className="mx-auto flex max-w-3xl gap-4">
         {/* Avatar */}
         <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-          <Bot className="h-4 w-4" />
+          <PennywiseLogo size="sm" />
         </div>
 
         {/* Content */}

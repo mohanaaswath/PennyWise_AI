@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Copy, Check, User, Bot } from 'lucide-react';
+import { Copy, Check, User } from 'lucide-react';
 import { Message } from '@/types/chat';
 import { Button } from '@/components/ui/button';
 import { copyToClipboard } from '@/lib/chatUtils';
 import { cn } from '@/lib/utils';
+import { PennywiseLogo } from '@/components/PennywiseLogo';
 
 interface ChatMessageProps {
   message: Message;
@@ -40,7 +41,7 @@ export const ChatMessage = ({ message, isStreaming = false }: ChatMessageProps) 
               : 'bg-accent text-accent-foreground'
           )}
         >
-          {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+          {isUser ? <User className="h-4 w-4" /> : <PennywiseLogo size="sm" />}
         </div>
 
         {/* Content */}
