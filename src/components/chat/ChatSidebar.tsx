@@ -1,4 +1,4 @@
-import { Plus, MessageSquare, Trash2, PanelLeftClose, PanelLeft, Settings, LogOut, User, Pin, PinOff, History } from 'lucide-react';
+import { Plus, MessageSquare, Trash2, PanelLeftClose, PanelLeft, Settings, LogOut, User, Pin, PinOff } from 'lucide-react';
 import { Conversation } from '@/types/chat';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -251,10 +251,6 @@ export const ChatSidebar = ({
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-56">
-                  <DropdownMenuItem onClick={() => navigate('/history')}>
-                    <History className="mr-2 h-4 w-4" />
-                    History
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/settings')}>
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
