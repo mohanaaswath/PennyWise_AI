@@ -1,4 +1,4 @@
-import { Sparkles, Zap, MessageSquare, ImageIcon } from 'lucide-react';
+import { Sparkles, Zap, MessageSquare, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PennywiseLogo } from '@/components/PennywiseLogo';
 
@@ -22,9 +22,9 @@ export const EmptyChat = () => {
 
       <div className="grid max-w-2xl gap-4 sm:grid-cols-2">
         <SuggestionCard
-          icon={<ImageIcon className="h-5 w-5" />}
-          title="Generate Images"
-          description="Create AI-generated artwork"
+          icon={<Heart className="h-5 w-5" />}
+          title="Friendly Talk"
+          description="Have a casual, friendly conversation"
         />
         <Link to="/creative-writing">
           <SuggestionCard
