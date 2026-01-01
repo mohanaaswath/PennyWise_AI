@@ -11,7 +11,7 @@ import Conversation from "./pages/Conversation";
 import CodeHelp from "./pages/CodeHelp";
 import Auth from "./pages/Auth";
 import Settings from "./pages/Settings";
-import History from "./pages/History";
+
 
 const queryClient = new QueryClient();
 
@@ -25,7 +25,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/history" element={<History />} />
+          
           <Route path="/creative-writing" element={<CreativeWriting />} />
           <Route path="/problem-solving" element={<ProblemSolving />} />
           <Route path="/conversation" element={<Conversation />} />
