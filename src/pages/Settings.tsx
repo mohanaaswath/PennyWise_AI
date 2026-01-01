@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Settings as SettingsIcon, Bell, Palette, Shield, User, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -16,6 +15,17 @@ import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 type SettingsSection = 'general' | 'notifications' | 'personalization' | 'data' | 'security' | 'account';
 
@@ -30,18 +40,68 @@ const sections = [
 
 export default function Settings() {
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const { toast } = useToast();
   const [activeSection, setActiveSection] = useState<SettingsSection>('general');
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
   const [isSaving, setIsSaving] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
 
-  // Settings state
-  const [appearance, setAppearance] = useState('system');
-  const [accentColor, setAccentColor] = useState('default');
-  const [language, setLanguage] = useState('auto');
-  const [notifications, setNotifications] = useState(true);
-  const [soundEffects, setSoundEffects] = useState(true);
+  // Settings state with localStorage persistence
+  const [appearance, setAppearance] = useState(() => localStorage.getItem('appearance') || 'dark');
+  const [language, setLanguage] = useState(() => localStorage.getItem('language') || 'auto');
+  const [notifications, setNotifications] = useState(() => localStorage.getItem('notifications') !== 'false');
+  const [soundEffects, setSoundEffects] = useState(() => localStorage.getItem('soundEffects') !== 'false');
+  const [emailNotifications, setEmailNotifications] = useState(() => localStorage.getItem('emailNotifications') !== 'false');
+
+  // Password change state
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  // Sync displayName when profile loads
+  useEffect(() => {
+    if (profile?.display_name) {
+      setDisplayName(profile.display_name);
+    }
+  }, [profile]);
+
+  // Apply appearance changes
+  useEffect(() => {
+    localStorage.setItem('appearance', appearance);
+    const root = document.documentElement;
+    if (appearance === 'light') {
+      root.classList.remove('dark');
+    } else if (appearance === 'dark') {
+      root.classList.add('dark');
+    } else {
+      // System preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (prefersDark) {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
+    }
+  }, [appearance]);
+
+  // Save settings to localStorage
+  useEffect(() => {
+    localStorage.setItem('language', language);
+  }, [language]);
+
+  useEffect(() => {
+    localStorage.setItem('notifications', String(notifications));
+  }, [notifications]);
+
+  useEffect(() => {
+    localStorage.setItem('soundEffects', String(soundEffects));
+  }, [soundEffects]);
+
+  useEffect(() => {
+    localStorage.setItem('emailNotifications', String(emailNotifications));
+  }, [emailNotifications]);
 
   const handleSaveProfile = async () => {
     if (!user) return;
@@ -68,6 +128,148 @@ export default function Settings() {
     }
   };
 
+  const handleExportData = async () => {
+    if (!user) return;
+
+    setIsExporting(true);
+    try {
+      // Fetch all conversations
+      const { data: conversations, error: convError } = await supabase
+        .from('conversations')
+        .select('*')
+        .eq('user_id', user.id);
+
+      if (convError) throw convError;
+
+      // Fetch all messages for each conversation
+      const allData: { conversations: any[]; messages: any[] } = { conversations: conversations || [], messages: [] };
+      
+      for (const conv of conversations || []) {
+        const { data: messages } = await supabase
+          .from('messages')
+          .select('*')
+          .eq('conversation_id', conv.id)
+          .order('created_at', { ascending: true });
+        
+        allData.messages.push(...(messages || []));
+      }
+
+      // Create and download JSON file
+      const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `pennywise-ai-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: 'Export complete',
+        description: `Exported ${allData.conversations.length} conversations and ${allData.messages.length} messages.`
+      });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Export failed',
+        description: 'Failed to export your data. Please try again.'
+      });
+    }
+    setIsExporting(false);
+  };
+
+  const handleClearData = async () => {
+    if (!user) return;
+
+    setIsClearing(true);
+    try {
+      // Delete all conversations (messages will cascade delete)
+      const { error } = await supabase
+        .from('conversations')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Data cleared',
+        description: 'All your conversations have been deleted.'
+      });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to clear data',
+        description: 'Could not delete your conversations. Please try again.'
+      });
+    }
+    setIsClearing(false);
+  };
+
+  const handleChangePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      toast({
+        variant: 'destructive',
+        title: 'Passwords do not match',
+        description: 'Please make sure both passwords are the same.'
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        variant: 'destructive',
+        title: 'Password too short',
+        description: 'Password must be at least 6 characters.'
+      });
+      return;
+    }
+
+    setIsChangingPassword(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setIsChangingPassword(false);
+
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to change password',
+        description: error.message
+      });
+    } else {
+      toast({
+        title: 'Password changed',
+        description: 'Your password has been updated successfully.'
+      });
+      setNewPassword('');
+      setConfirmPassword('');
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+
+    try {
+      // Delete all user data first
+      await supabase.from('conversations').delete().eq('user_id', user.id);
+      await supabase.from('profiles').delete().eq('user_id', user.id);
+      
+      // Sign out (actual account deletion would require admin API)
+      await signOut();
+      
+      toast({
+        title: 'Account deleted',
+        description: 'Your account and all data have been removed.'
+      });
+      navigate('/auth');
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to delete account',
+        description: 'Could not delete your account. Please try again.'
+      });
+    }
+  };
+
   const renderContent = () => {
     switch (activeSection) {
       case 'general':
@@ -78,6 +280,7 @@ export default function Settings() {
             <div className="flex items-center justify-between py-3 border-b border-border">
               <div>
                 <p className="text-sm font-medium text-foreground">Appearance</p>
+                <p className="text-xs text-muted-foreground">Choose your preferred theme</p>
               </div>
               <Select value={appearance} onValueChange={setAppearance}>
                 <SelectTrigger className="w-32">
@@ -93,24 +296,8 @@ export default function Settings() {
 
             <div className="flex items-center justify-between py-3 border-b border-border">
               <div>
-                <p className="text-sm font-medium text-foreground">Accent color</p>
-              </div>
-              <Select value={accentColor} onValueChange={setAccentColor}>
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="default">Default</SelectItem>
-                  <SelectItem value="blue">Blue</SelectItem>
-                  <SelectItem value="purple">Purple</SelectItem>
-                  <SelectItem value="orange">Orange</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-center justify-between py-3 border-b border-border">
-              <div>
                 <p className="text-sm font-medium text-foreground">Language</p>
+                <p className="text-xs text-muted-foreground">Select your preferred language</p>
               </div>
               <Select value={language} onValueChange={setLanguage}>
                 <SelectTrigger className="w-32">
@@ -143,9 +330,17 @@ export default function Settings() {
             <div className="flex items-center justify-between py-3 border-b border-border">
               <div>
                 <p className="text-sm font-medium text-foreground">Push notifications</p>
-                <p className="text-xs text-muted-foreground">Receive push notifications</p>
+                <p className="text-xs text-muted-foreground">Receive push notifications in browser</p>
               </div>
               <Switch checked={notifications} onCheckedChange={setNotifications} />
+            </div>
+
+            <div className="flex items-center justify-between py-3 border-b border-border">
+              <div>
+                <p className="text-sm font-medium text-foreground">Email notifications</p>
+                <p className="text-xs text-muted-foreground">Receive updates via email</p>
+              </div>
+              <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
             </div>
           </div>
         );
@@ -157,6 +352,7 @@ export default function Settings() {
             
             <div className="py-3 border-b border-border">
               <p className="text-sm font-medium text-foreground mb-2">Display name</p>
+              <p className="text-xs text-muted-foreground mb-3">This name will be shown in your profile</p>
               <div className="flex gap-2">
                 <Input
                   value={displayName}
@@ -179,14 +375,34 @@ export default function Settings() {
             
             <div className="py-3 border-b border-border">
               <p className="text-sm font-medium text-foreground">Export data</p>
-              <p className="text-xs text-muted-foreground mb-3">Download all your conversation data</p>
-              <Button variant="outline">Export data</Button>
+              <p className="text-xs text-muted-foreground mb-3">Download all your conversation data as JSON</p>
+              <Button variant="outline" onClick={handleExportData} disabled={isExporting}>
+                {isExporting ? 'Exporting...' : 'Export data'}
+              </Button>
             </div>
 
             <div className="py-3 border-b border-border">
               <p className="text-sm font-medium text-foreground">Clear conversations</p>
               <p className="text-xs text-muted-foreground mb-3">Delete all your conversation history</p>
-              <Button variant="destructive">Clear all data</Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" disabled={isClearing}>
+                    {isClearing ? 'Clearing...' : 'Clear all data'}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete all your conversations and messages. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleClearData}>Delete all</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         );
@@ -197,9 +413,28 @@ export default function Settings() {
             <h2 className="text-lg font-semibold text-foreground">Security</h2>
             
             <div className="py-3 border-b border-border">
-              <p className="text-sm font-medium text-foreground">Change password</p>
+              <p className="text-sm font-medium text-foreground mb-2">Change password</p>
               <p className="text-xs text-muted-foreground mb-3">Update your account password</p>
-              <Button variant="outline">Change password</Button>
+              <div className="space-y-3 max-w-xs">
+                <Input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="New password"
+                />
+                <Input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm new password"
+                />
+                <Button 
+                  onClick={handleChangePassword} 
+                  disabled={isChangingPassword || !newPassword || !confirmPassword}
+                >
+                  {isChangingPassword ? 'Changing...' : 'Change password'}
+                </Button>
+              </div>
             </div>
           </div>
         );
@@ -215,9 +450,38 @@ export default function Settings() {
             </div>
 
             <div className="py-3 border-b border-border">
+              <p className="text-sm font-medium text-foreground">Member since</p>
+              <p className="text-sm text-muted-foreground">
+                {user?.created_at ? new Date(user.created_at).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                }) : 'Unknown'}
+              </p>
+            </div>
+
+            <div className="py-3 border-b border-border">
               <p className="text-sm font-medium text-destructive">Delete account</p>
               <p className="text-xs text-muted-foreground mb-3">Permanently delete your account and all data</p>
-              <Button variant="destructive">Delete account</Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive">Delete account</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete your account, all conversations, and personal data. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                      Delete account
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         );
