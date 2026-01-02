@@ -4,9 +4,11 @@ import { createMessage, generateTitle, streamAIResponse, isImageRequest, extract
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useSettings } from '@/hooks/useSettings';
 
 export const useChat = () => {
   const { toast } = useToast();
+  const { playSound } = useSettings();
   const { user } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
@@ -213,6 +215,9 @@ export const useChat = () => {
       return conv;
     }));
 
+    // Play send sound
+    playSound('send');
+
     // Save user message to database
     try {
       await supabase.from('messages').insert({
@@ -331,6 +336,9 @@ export const useChat = () => {
         .update({ updated_at: new Date().toISOString() })
         .eq('id', activeConversationId);
 
+      // Play receive sound
+      playSound('receive');
+
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') {
         const partialMessage = createMessage('assistant', streamingContent || 'Response was stopped.');
@@ -355,6 +363,7 @@ export const useChat = () => {
       } else {
         console.error('Error generating response:', error);
         const errorMessage = error instanceof Error ? error.message : 'Failed to get response';
+        playSound('error');
         toast({
           title: "Error",
           description: errorMessage,
@@ -366,7 +375,7 @@ export const useChat = () => {
       setStreamingContent('');
       abortControllerRef.current = null;
     }
-  }, [activeConversationId, activeConversation, isStreaming, streamingContent, toast]);
+  }, [activeConversationId, activeConversation, isStreaming, streamingContent, toast, playSound]);
 
   const stopGeneration = useCallback(() => {
     if (abortControllerRef.current) {
