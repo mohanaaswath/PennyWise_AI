@@ -1,17 +1,8 @@
 import { Sparkles, Zap, Heart, Code } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { PennywiseLogo } from '@/components/PennywiseLogo';
 
-interface EmptyChatProps {
-  onSendMessage?: (message: string) => void;
-}
-
-export const EmptyChat = ({ onSendMessage }: EmptyChatProps) => {
-  const handleSuggestionClick = (prompt: string) => {
-    if (onSendMessage) {
-      onSendMessage(prompt);
-    }
-  };
-
+export const EmptyChat = () => {
   return (
     <div className="flex flex-1 flex-col items-center justify-center p-8">
       <h2 className="mb-6 text-sm font-medium tracking-widest gradient-text">
@@ -30,30 +21,34 @@ export const EmptyChat = ({ onSendMessage }: EmptyChatProps) => {
       </p>
 
       <div className="grid max-w-2xl gap-4 sm:grid-cols-2">
-        <SuggestionCard
-          icon={<Heart className="h-5 w-5" />}
-          title="Friendly Talk"
-          description="Have a casual, friendly conversation"
-          onClick={() => handleSuggestionClick("Let's have a friendly chat! How are you doing today?")}
-        />
-        <SuggestionCard
-          icon={<Sparkles className="h-5 w-5" />}
-          title="Creative Writing"
-          description="Help me write a story or poem"
-          onClick={() => handleSuggestionClick("Write me a short love story with a happy ending")}
-        />
-        <SuggestionCard
-          icon={<Zap className="h-5 w-5" />}
-          title="Problem Solving"
-          description="Explain a complex concept simply"
-          onClick={() => handleSuggestionClick("Explain quantum physics in simple terms")}
-        />
-        <SuggestionCard
-          icon={<Code className="h-5 w-5" />}
-          title="Code Help"
-          description="Debug or explain some code"
-          onClick={() => handleSuggestionClick("Explain how async/await works in JavaScript")}
-        />
+        <Link to="/friendly-talk">
+          <SuggestionCard
+            icon={<Heart className="h-5 w-5" />}
+            title="Friendly Talk"
+            description="Have a casual, friendly conversation"
+          />
+        </Link>
+        <Link to="/creative-writing">
+          <SuggestionCard
+            icon={<Sparkles className="h-5 w-5" />}
+            title="Creative Writing"
+            description="Help me write a story or poem"
+          />
+        </Link>
+        <Link to="/problem-solving">
+          <SuggestionCard
+            icon={<Zap className="h-5 w-5" />}
+            title="Problem Solving"
+            description="Explain a complex concept simply"
+          />
+        </Link>
+        <Link to="/code-help">
+          <SuggestionCard
+            icon={<Code className="h-5 w-5" />}
+            title="Code Help"
+            description="Debug or explain some code"
+          />
+        </Link>
       </div>
     </div>
   );
@@ -63,15 +58,11 @@ interface SuggestionCardProps {
   icon: React.ReactNode;
   title: string;
   description: string;
-  onClick?: () => void;
 }
 
-const SuggestionCard = ({ icon, title, description, onClick }: SuggestionCardProps) => {
+const SuggestionCard = ({ icon, title, description }: SuggestionCardProps) => {
   return (
-    <div 
-      onClick={onClick}
-      className="group cursor-pointer rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/50 hover:shadow-glow"
-    >
+    <div className="group cursor-pointer rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/50 hover:shadow-glow">
       <div className="mb-2 flex items-center gap-2 gradient-text">
         {icon}
         <span className="font-display font-medium">{title}</span>
