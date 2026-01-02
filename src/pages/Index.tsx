@@ -38,6 +38,18 @@ const Index = () => {
   const hasMessages = activeConversation && activeConversation.messages.length > 0;
   const canRegenerate = hasMessages && activeConversation.messages.some(m => m.role === 'assistant');
 
+  const handleSuggestionSend = async (message: string) => {
+    if (!activeConversationId) {
+      const newConv = await createConversation();
+      if (newConv) {
+        // Small delay to ensure state is updated
+        setTimeout(() => sendMessage(message), 100);
+      }
+    } else {
+      sendMessage(message);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
@@ -80,7 +92,7 @@ const Index = () => {
               <div ref={messagesEndRef} />
             </div>
           ) : (
-            <EmptyChat />
+            <EmptyChat onSendMessage={handleSuggestionSend} />
           )}
         </div>
 
