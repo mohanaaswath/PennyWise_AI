@@ -21,11 +21,13 @@ export const EmptyChat = () => {
       </p>
 
       <div className="grid max-w-2xl gap-4 sm:grid-cols-2">
-        <SuggestionCard
-          icon={<Heart className="h-5 w-5" />}
-          title="Friendly Talk"
-          description="Have a casual, friendly conversation"
-        />
+        <Link to="/friendly-talk">
+          <SuggestionCard
+            icon={<Heart className="h-5 w-5" />}
+            title="Friendly Talk"
+            description="Have a casual, friendly conversation"
+          />
+        </Link>
         <Link to="/creative-writing">
           <SuggestionCard
             icon={<Sparkles className="h-5 w-5" />}

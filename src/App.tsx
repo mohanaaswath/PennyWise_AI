@@ -9,6 +9,7 @@ import CreativeWriting from "./pages/CreativeWriting";
 import ProblemSolving from "./pages/ProblemSolving";
 import Conversation from "./pages/Conversation";
 import CodeHelp from "./pages/CodeHelp";
+import FriendlyTalk from "./pages/FriendlyTalk";
 import Auth from "./pages/Auth";
 import Settings from "./pages/Settings";
 
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/problem-solving" element={<ProblemSolving />} />
           <Route path="/conversation" element={<Conversation />} />
           <Route path="/code-help" element={<CodeHelp />} />
+          <Route path="/friendly-talk" element={<FriendlyTalk />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
