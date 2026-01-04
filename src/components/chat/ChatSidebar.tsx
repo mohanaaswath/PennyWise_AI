@@ -1,4 +1,4 @@
-import { Plus, MessageSquare, Trash2, PanelLeftClose, PanelLeft, Settings, LogOut, User, Search } from 'lucide-react';
+import { Plus, MessageSquare, Trash2, PanelLeftClose, PanelLeft, Settings, LogOut, User } from 'lucide-react';
 import { Conversation } from '@/types/chat';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -99,33 +99,14 @@ export const ChatSidebar = ({
       >
         <div className="flex h-full flex-col">
           {/* Top Actions */}
-          <div className="p-2 space-y-1">
-            <div className="flex items-center justify-between">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onToggle}
-                className="h-10 w-10 text-sidebar-foreground hover:bg-sidebar-accent"
-              >
-                <PanelLeftClose className="h-5 w-5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onNewConversation}
-                className="h-10 w-10 text-sidebar-foreground hover:bg-sidebar-accent"
-              >
-                <Plus className="h-5 w-5" />
-              </Button>
-            </div>
-            
-            {/* Search Chats */}
+          <div className="p-2">
             <Button
               variant="ghost"
-              className="w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent h-10 px-3"
+              size="icon"
+              onClick={onToggle}
+              className="h-10 w-10 text-sidebar-foreground hover:bg-sidebar-accent"
             >
-              <Search className="h-4 w-4" />
-              <span className="text-sm">Search chats</span>
+              <PanelLeftClose className="h-5 w-5" />
             </Button>
           </div>
 
