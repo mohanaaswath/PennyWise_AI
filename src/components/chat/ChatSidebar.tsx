@@ -137,27 +137,18 @@ export const ChatSidebar = ({
       >
         <div className="flex h-full flex-col">
           {/* Header */}
-          <div className="border-b border-sidebar-border p-4">
-            <h2 className="mb-4 text-sm font-medium tracking-widest gradient-text">
-              PENNYWISE AI
+          <div className="flex items-center justify-between border-b border-sidebar-border p-4">
+            <h2 className="text-lg font-semibold text-sidebar-foreground">
+              Your chats
             </h2>
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={onNewConversation}
-                className="flex-1 justify-start gap-2 bg-primary/10 text-primary hover:bg-primary/20"
-              >
-                <Plus className="h-4 w-4" />
-                New Chat
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onToggle}
-                className="h-10 w-10 text-muted-foreground hover:text-foreground"
-              >
-                <PanelLeftClose className="h-5 w-5" />
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggle}
+              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            >
+              <PanelLeftClose className="h-5 w-5" />
+            </Button>
           </div>
 
           {/* Conversations List */}
@@ -174,7 +165,7 @@ export const ChatSidebar = ({
                 
                 return (
                   <div key={period} className="mb-4">
-                    <p className="mb-2 px-3 text-xs font-medium text-muted-foreground">
+                    <p className="mb-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       {period}
                     </p>
                     <div className="space-y-1">
@@ -182,17 +173,23 @@ export const ChatSidebar = ({
                         <div
                           key={conversation.id}
                           className={cn(
-                            'group relative flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors',
+                            'group relative flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 transition-all',
                             activeConversationId === conversation.id
-                              ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                              ? 'bg-primary/15 text-primary border-l-2 border-primary shadow-sm'
                               : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
                           )}
                           onClick={() => onSelectConversation(conversation.id)}
                         >
-                          <MessageSquare className="h-4 w-4 flex-shrink-0" />
-                          <p className="min-w-0 flex-1 truncate text-sm">
+                          <MessageSquare className={cn(
+                            "h-4 w-4 flex-shrink-0",
+                            activeConversationId === conversation.id && "text-primary"
+                          )} />
+                          <p className="min-w-0 flex-1 truncate text-sm font-medium">
                             {conversation.title}
                           </p>
+                          {conversation.isPinned && (
+                            <Pin className="h-3 w-3 text-primary/60" />
+                          )}
                           <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                             {onTogglePin && (
                               <Button
@@ -230,6 +227,17 @@ export const ChatSidebar = ({
                 );
               })
             )}
+          </div>
+
+          {/* New Chat Button at Bottom */}
+          <div className="border-t border-sidebar-border p-3">
+            <Button
+              onClick={onNewConversation}
+              className="w-full justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              <Plus className="h-4 w-4" />
+              New chat
+            </Button>
           </div>
 
           {/* User Profile Footer */}
