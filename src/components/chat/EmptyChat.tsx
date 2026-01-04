@@ -1,6 +1,6 @@
 import { Sparkles, Zap, Heart, Code } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { PennywiseLogo } from '@/components/PennywiseLogo';
+import pennywiseImage from '@/assets/pennywise-home.png';
 
 export const EmptyChat = () => {
   return (
@@ -9,8 +9,8 @@ export const EmptyChat = () => {
         PENNYWISE AI
       </h2>
       
-      <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 via-accent/10 to-accent/20 shadow-glow">
-        <PennywiseLogo size="lg" />
+      <div className="mb-8 h-32 w-32 overflow-hidden rounded-2xl shadow-glow">
+        <img src={pennywiseImage} alt="Pennywise AI" className="h-full w-full object-cover" />
       </div>
       
       <h1 className="mb-2 font-display text-2xl font-semibold text-foreground">
