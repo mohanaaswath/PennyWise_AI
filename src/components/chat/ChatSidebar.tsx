@@ -98,23 +98,23 @@ export const ChatSidebar = ({
         )}
       >
         <div className="flex h-full flex-col">
-          {/* Top Actions */}
-          <div className="p-2">
+          {/* Header */}
+          <div className="p-3 flex items-center justify-between">
+            <h2 className="text-sm font-medium tracking-widest gradient-text">
+              PENNYWISE AI
+            </h2>
             <Button
               variant="ghost"
               size="icon"
               onClick={onToggle}
-              className="h-10 w-10 text-sidebar-foreground hover:bg-sidebar-accent"
+              className="h-8 w-8 text-sidebar-foreground hover:bg-sidebar-accent"
             >
               <PanelLeftClose className="h-5 w-5" />
             </Button>
           </div>
 
-          {/* Your Chats Section */}
+          {/* Chats List */}
           <div className="flex-1 overflow-y-auto scrollbar-thin">
-            <div className="px-3 py-2">
-              <p className="text-xs text-muted-foreground mb-2">Your chats</p>
-            </div>
             
             <div className="px-2 space-y-0.5">
               {sortedConversations.length === 0 ? (
