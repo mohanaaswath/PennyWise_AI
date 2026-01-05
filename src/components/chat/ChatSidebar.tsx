@@ -113,9 +113,20 @@ export const ChatSidebar = ({
             </Button>
           </div>
 
+          {/* New Chat Button */}
+          <div className="px-2 mb-2">
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent h-10 px-3"
+              onClick={onNewConversation}
+            >
+              <Plus className="h-4 w-4" />
+              <span className="text-sm">New chat</span>
+            </Button>
+          </div>
+
           {/* Chats List */}
           <div className="flex-1 overflow-y-auto scrollbar-thin">
-            
             <div className="px-2 space-y-0.5">
               {sortedConversations.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center px-4">
@@ -151,18 +162,6 @@ export const ChatSidebar = ({
                   </div>
                 ))
               )}
-            </div>
-            
-            {/* New Chat in list */}
-            <div className="px-2 mt-1">
-              <Button
-                variant="ghost"
-                className="w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent h-10 px-3"
-                onClick={onNewConversation}
-              >
-                <Plus className="h-4 w-4" />
-                <span className="text-sm">New chat</span>
-              </Button>
             </div>
           </div>
 
